@@ -63,22 +63,17 @@ impl Default for Game {
 
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let score_text = match self {
-            Self::Deuce => "Deuce",
-            Self::Advantage(player) => return write!(f, "Advantage {}", player),
-            Self::Win(player) => return write!(f, "{} has won", player),
-            Self::Scores(lhs, rhs) if lhs == rhs => return write!(f, "{}-all", lhs),
-            Self::Scores(lhs, rhs) => return write!(f, "{}-{}", lhs, rhs),
-        };
-        write!(f, "{}", score_text)
+        match self {
+            Self::Deuce => write!(f, "Deuce"),
+            Self::Advantage(player) => write!(f, "Advantage {}", player),
+            Self::Win(player) => write!(f, "{} has won", player),
+            Self::Scores(lhs, rhs) if lhs == rhs => write!(f, "{}-all", lhs),
+            Self::Scores(lhs, rhs) => write!(f, "{}-{}", lhs, rhs),
+        }
     }
 }
 
 impl Game {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn advance_score(self, player: Player) -> Self {
         match (player, self) {
             (x, Self::Advantage(y)) if x != y => Self::Deuce,
@@ -104,7 +99,6 @@ impl Game {
     pub fn score_point(&mut self, player: Player) {
         *self = self.advance_score(player);
     }
-
 }
 
 #[cfg(test)]
@@ -125,12 +119,12 @@ mod tests {
     #[case(vec!(3,3,2), "Player 1 has won")]
     #[case(vec!(3,3,1,1), "Deuce")]
     fn test_tennis_scoring(#[case] sequence: Vec<i32>, #[case] expected: &str) {
-        let mut game = Game::new();
+        let mut game = Game::default();
 
-        for (i, &n) in sequence.iter().enumerate() {
-            let player = if i % 2 == 0 { Player::One } else { Player::Two };
+        let player_cycle = [Player::One, Player::Two].iter().cycle();
+        for (&n, player) in sequence.iter().zip(player_cycle) {
             for _ in 0..n {
-                game.score_point(player);
+                game.score_point(*player);
             }
         }
 
