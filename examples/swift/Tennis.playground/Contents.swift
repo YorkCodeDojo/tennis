@@ -59,6 +59,23 @@ struct Umpire {
     
     static func awardPoints(to player: PlayerType, game: Game) -> Game {
         
+        // Handle special case: if opponent has advantage, reset to deuce
+        if game.state == .playing {
+            if player == .server && game.players.reciever.points == .avantage {
+                let resetPlayers = Players(
+                    server: Player(points: .forty),
+                    reciever: Player(points: .forty)
+                )
+                return Game(state: .deuce, players: resetPlayers)
+            } else if player == .reciever && game.players.server.points == .avantage {
+                let resetPlayers = Players(
+                    server: Player(points: .forty),
+                    reciever: Player(points: .forty)
+                )
+                return Game(state: .deuce, players: resetPlayers)
+            }
+        }
+        
         // First, increment the player's points
         let updatedPlayers = incrementPlayerPoints(player: player, players: game.players)
         
@@ -244,6 +261,54 @@ func testAdvantageAndWin() {
     assertEqual(game.state, .won, "Game should be won")
 }
 
+func testCompleteDeuceBattle() {
+    print("\n🧪 Testing Complete Deuce Battle...")
+    var game = Game()
+    
+    // Set up deuce
+    game = Game(state: .deuce, players: Players(
+        server: Player(points: .forty),
+        reciever: Player(points: .forty)
+    ))
+    
+    // Server gets advantage
+    game = Umpire.awardPoints(to: .server, game: game)
+    assertEqual(game.state, .playing, "Game should be playing after advantage")
+    assertEqual(game.players.server.points, .avantage, "Server should have advantage")
+    
+    // Receiver equalizes - back to deuce
+    game = Umpire.awardPoints(to: .reciever, game: game)
+    assertEqual(game.state, .deuce, "Game should be back to deuce")
+    assertEqual(game.players.server.points, .forty, "Server should be back to forty")
+    assertEqual(game.players.reciever.points, .forty, "Receiver should be back to forty")
+    
+    // Receiver gets advantage this time
+    game = Umpire.awardPoints(to: .reciever, game: game)
+    assertEqual(game.state, .playing, "Game should be playing with receiver advantage")
+    assertEqual(game.players.reciever.points, .avantage, "Receiver should have advantage")
+    
+    // Receiver wins the game
+    game = Umpire.awardPoints(to: .reciever, game: game)
+    assertEqual(game.state, .won, "Game should be won by receiver")
+}
+
+func testAdvantageBackToDeuce() {
+    print("\n🧪 Testing Advantage Back to Deuce...")
+    var game = Game()
+    
+    // Set up advantage scenario - server has advantage
+    game = Game(state: .playing, players: Players(
+        server: Player(points: .avantage),
+        reciever: Player(points: .forty)
+    ))
+    
+    // Receiver wins point, should go back to deuce
+    game = Umpire.awardPoints(to: .reciever, game: game)
+    assertEqual(game.state, .deuce, "Game should be back to deuce")
+    assertEqual(game.players.server.points, .forty, "Server should be back to forty")
+    assertEqual(game.players.reciever.points, .forty, "Receiver should be back to forty")
+}
+
 func testReceiverWinsGame() {
     print("\n🧪 Testing Receiver Wins Game...")
     var game = Game()
@@ -266,6 +331,8 @@ testPointProgression()
 testServerWinsGame()
 testDeuceScenario()
 testAdvantageAndWin()
+testCompleteDeuceBattle()
+testAdvantageBackToDeuce()
 testReceiverWinsGame()
 
 print("\n🎾 All tests completed!")
