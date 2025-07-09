@@ -73,6 +73,8 @@ function startGame() {
             default:
                 console.error(`Oh no, player ${playerNumber} does not exist`);
         }
+
+        return {...game};
     }
 
     return game;
