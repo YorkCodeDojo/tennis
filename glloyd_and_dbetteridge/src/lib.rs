@@ -54,13 +54,13 @@ impl Game {
 
     pub fn advance_score(self, player: Player) -> Game {
         match (player, self) {
-            (Player::One, Game::Deuce) => Game::AdvantagePlayer1,
-            (Player::Two, Game::Deuce) => Game::AdvantagePlayer2,
-
             (Player::One, Game::AdvantagePlayer2) => Game::Deuce,
             (Player::Two, Game::AdvantagePlayer1) => Game::Deuce,
             (Player::One, Game::Scores(PlayerScore::Thirty, PlayerScore::Forty)) => Game::Deuce,
             (Player::Two, Game::Scores(PlayerScore::Forty, PlayerScore::Thirty)) => Game::Deuce,
+
+            (Player::One, Game::Deuce) => Game::AdvantagePlayer1,
+            (Player::Two, Game::Deuce) => Game::AdvantagePlayer2,
 
             (Player::One, Game::AdvantagePlayer1) => Game::Player1Win,
             (Player::Two, Game::AdvantagePlayer2) => Game::Player2Win,
@@ -95,7 +95,6 @@ impl Game {
             Game::Scores(lhs, rhs) if lhs == rhs => format!("{}-all", lhs),
             Game::Scores(lhs, rhs) => format!("{}-{}", lhs, rhs),
         }
-        .into()
     }
 }
 
