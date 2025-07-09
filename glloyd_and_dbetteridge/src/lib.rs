@@ -118,6 +118,16 @@ mod tests {
     #[case(vec!(3,3,1), "Advantage Player 1")]
     #[case(vec!(3,3,2), "Player 1 has won")]
     #[case(vec!(3,3,1,1), "Deuce")]
+    #[case(vec!(0,4), "Player 2 has won")]
+    #[case(vec!(1,1), "15-all")]
+    #[case(vec!(2,2), "30-all")]
+    #[case(vec!(1,2), "15-30")]
+    #[case(vec!(2,1), "30-15")]
+    #[case(vec!(3,3,0,1), "Advantage Player 2")]
+    #[case(vec!(3,3,0,2), "Player 2 has won")]
+    #[case(vec!(0,3,1), "15-40")]
+    #[case(vec!(3,3,1,1,0,1), "Advantage Player 2")]
+    #[case(vec!(3,3,1,1,1,1,0,2), "Player 2 has won")]
     fn test_tennis_scoring(#[case] sequence: Vec<i32>, #[case] expected: &str) {
         let mut game = Game::default();
 
