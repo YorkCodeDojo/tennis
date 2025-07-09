@@ -42,17 +42,15 @@ public class Game
 
     public bool AddPlayerOneScore()
     {
-        var nextState = _states[_currentState].NextPlayer1State;
         var previousState = _currentState;
-        _currentState = nextState;
-        return nextState != previousState;
+        _currentState = _states[_currentState].NextPlayer1State;
+        return _currentState != previousState;
     }
 
     public bool AddPlayerTwoScore()
     {
-        var nextState = _states[_currentState].NextPlayer2State;
         var previousState = _currentState;
-        _currentState = nextState;
-        return nextState != previousState;
+        _currentState = _states[_currentState].NextPlayer2State;
+        return _currentState != previousState;
     }
 }
