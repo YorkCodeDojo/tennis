@@ -31,8 +31,14 @@ I suggest trying the ping-pong style of testing.
 * As a pair you then refactor
 * Swap roles
 
+## Getting started
+1. Fork this repo (https://github.com/YorkCodeDojo/tennis) and clone it to your machine.
+2. Create a folder in your local copy with name of your pair.
+3. Put your code into this folder
+4. At the end of the evening, create a pull request to merge your code back into the original repo
+
 
 ## References
 
-https://codingdojo.org/kata/Tennis/
-https://github.com/emilybache/Tennis-Refactoring-Kata/tree/main/csharp
+* https://codingdojo.org/kata/Tennis/
+* https://github.com/emilybache/Tennis-Refactoring-Kata/tree/main/csharp
