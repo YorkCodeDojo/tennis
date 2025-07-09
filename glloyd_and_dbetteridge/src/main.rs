@@ -94,11 +94,11 @@ impl Game {
 
     pub(crate) fn print_score(&self) -> String {
         match self {
-            Game::Deuce => format!("Deuce"),
-            Game::AdvantagePlayer1 => format!("Advantage player1"),
-            Game::AdvantagePlayer2 => format!("Advantage player2"),
-            Game::Scores(PlayerScore::Win, _) => format!("player1 has won"),
-            Game::Scores(_, PlayerScore::Win) => format!("player2 has won"),
+            Game::Deuce => "Deuce".to_string(),
+            Game::AdvantagePlayer1 => "Advantage player1".to_string(),
+            Game::AdvantagePlayer2 => "Advantage player2".to_string(),
+            Game::Scores(PlayerScore::Win, _) => "player1 has won".to_string(),
+            Game::Scores(_, PlayerScore::Win) => "player2 has won".to_string(),
             Game::Scores(lhs, rhs) if lhs == rhs => format!("{}-all", lhs),
             Game::Scores(lhs, rhs) => format!("{}-{}", lhs, rhs),
         }.into()
