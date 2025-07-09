@@ -10,7 +10,6 @@ enum PlayerScore {
     Fifteen,
     Thirty,
     Forty,
-    Win,
 }
 
 impl Display for PlayerScore {
@@ -20,7 +19,6 @@ impl Display for PlayerScore {
             Self::Fifteen => "15",
             Self::Thirty => "30",
             Self::Forty => "40",
-            Self::Win => "player1 has won",
         };
         write!(f, "{}", str)
     }
@@ -32,8 +30,7 @@ impl PlayerScore {
             Self::Love => Self::Fifteen,
             Self::Fifteen => Self::Thirty,
             Self::Thirty => Self::Forty,
-            Self::Forty => Self::Win,
-            Self::Win => Self::Win,
+            Self::Forty => Self::Forty,
         }
     }
 }
@@ -43,6 +40,8 @@ enum Game {
     Deuce,
     AdvantagePlayer1,
     AdvantagePlayer2,
+    Player1Win,
+    Player2Win,
     Scores(PlayerScore, PlayerScore),
 }
 
@@ -61,25 +60,21 @@ impl Game {
         match player {
             Player::One => match self {
                 Game::Deuce => Game::AdvantagePlayer1,
-                Game::AdvantagePlayer1 => Game::AdvantagePlayer1,
-                Game::AdvantagePlayer2 => Game::AdvantagePlayer2,
-                Game::Scores(player1, player2) => match (player1, player2) {
-                    (PlayerScore::Win, _) => Game::Scores(player1, player2),
-                    (_, PlayerScore::Win) => Game::Scores(player1, player2),
-                    (PlayerScore::Thirty, PlayerScore::Forty) => Game::Deuce,
-                    _ => Game::Scores(player1.advance_score(), player2),
-                },
+                Game::AdvantagePlayer1 => Game::Player1Win,
+                Game::AdvantagePlayer2 => Game::Deuce,
+                Game::Scores(PlayerScore::Thirty, PlayerScore::Forty) => Game::Deuce,
+                Game::Scores(PlayerScore::Forty, _) => Game::Player1Win,
+                Game::Scores(player1, player2) => Game::Scores(player1.advance_score(), player2),
+                x => x,
             },
             Player::Two => match self {
                 Game::Deuce => Game::AdvantagePlayer2,
-                Game::AdvantagePlayer1 => Game::AdvantagePlayer1,
-                Game::AdvantagePlayer2 => Game::AdvantagePlayer2,
-                Game::Scores(player1, player2) => match (player1, player2) {
-                    (PlayerScore::Win, _) => Game::Scores(player1, player2),
-                    (_, PlayerScore::Win) => Game::Scores(player1, player2),
-                    (PlayerScore::Forty, PlayerScore::Thirty) => Game::Deuce,
-                    _ => Game::Scores(player1, player2.advance_score()),
-                },
+                Game::AdvantagePlayer1 => Game::Deuce,
+                Game::AdvantagePlayer2 => Game::Player2Win,
+                Game::Scores(PlayerScore::Forty, PlayerScore::Thirty) => Game::Deuce,
+                Game::Scores(_, PlayerScore::Forty) => Game::Player2Win,
+                Game::Scores(player1, player2) => Game::Scores(player1, player2.advance_score()),
+                x => x,
             },
         }
     }
@@ -97,8 +92,8 @@ impl Game {
             Game::Deuce => "Deuce".to_string(),
             Game::AdvantagePlayer1 => "Advantage player1".to_string(),
             Game::AdvantagePlayer2 => "Advantage player2".to_string(),
-            Game::Scores(PlayerScore::Win, _) => "player1 has won".to_string(),
-            Game::Scores(_, PlayerScore::Win) => "player2 has won".to_string(),
+            Game::Player1Win => "player1 has won".to_string(),
+            Game::Player2Win => "player2 has won".to_string(),
             Game::Scores(lhs, rhs) if lhs == rhs => format!("{}-all", lhs),
             Game::Scores(lhs, rhs) => format!("{}-{}", lhs, rhs),
         }
@@ -121,6 +116,8 @@ mod tests {
     #[case(vec!(4,0), "player1 has won")]
     #[case(vec!(3,3), "Deuce")]
     #[case(vec!(3,3,1), "Advantage player1")]
+    #[case(vec!(3,3,2), "player1 has won")]
+    #[case(vec!(3,3,1,1), "Deuce")]
     fn test_tennis_scoring(#[case] sequence: Vec<i32>, #[case] expected: &str) {
         let mut game = Game::new();
 
