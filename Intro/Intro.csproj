@@ -21,9 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Images\pascal.jpg">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
       <None Update="Images\York_Code_Dojo.jpg">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
