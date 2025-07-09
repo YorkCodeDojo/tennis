@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 #[derive(PartialEq, Copy, Clone)]
-enum PlayerScore {
+pub enum PlayerScore {
     Love,
     Fifteen,
     Thirty,
