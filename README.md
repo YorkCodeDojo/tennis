@@ -1,1 +1,38 @@
-# tennis
+# Tennis
+
+## Rules
+
+* Each player can have these points:  “love” “15” “30” “40”
+* If you have 40 and you win the point you win the game, however there are special rules.
+* If both have 40 the players are “deuce”.
+* If the game is in deuce, the winner of a point will have advantage
+* If the player with advantage wins the ball he wins the game
+* If the player without advantage wins they are back at deuce.
+
+## Task
+
+Write a program which allows you to keep track of the scores during a game of tennis.
+
+For example
+
+```
+game = new Game()
+game.PrintScore();   // Displays love-all
+game.PointForPlayerOne();
+game.PrintScore();   // Displays 15-love
+etc
+```
+
+## Testing
+I suggest trying the ping-pong style of testing.  
+
+* One person writes a failing test
+* The other person then writes enough code to pass the test
+* As a pair you then refactor
+* Swap roles
+
+
+## References
+
+https://codingdojo.org/kata/Tennis/
+https://github.com/emilybache/Tennis-Refactoring-Kata/tree/main/csharp
