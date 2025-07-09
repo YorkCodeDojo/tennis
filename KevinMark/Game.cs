@@ -34,24 +34,14 @@ public class Game
 
     private (bool valid, Score currentPlayer, Score otherPlayer) AddScore(Score currentPlayer, Score otherPlayer)
     {
-        if (_playerOneScore == Score.Game || _playerTwoScore == Score.Game)
+        return (currentPlayer, otherPlayer) switch
         {
-            return (false, currentPlayer, otherPlayer);
-        }
-
-        if (currentPlayer == Score.Forty)
-        {
-            if (otherPlayer < Score.Forty)
-                return (true, Score.Game, otherPlayer);
-
-            if (otherPlayer == Score.Forty)
-                return (true, Score.Advantage, otherPlayer);
-
-            if (otherPlayer == Score.Advantage)
-                return (true, currentPlayer, --otherPlayer);
-        }
-
-        return (true, ++currentPlayer, otherPlayer);
+            (Score.Game, _) or (_, Score.Game) => (false, currentPlayer, otherPlayer),
+            (Score.Forty, < Score.Forty) => (true, Score.Game, otherPlayer),
+            (Score.Forty, Score.Forty) => (true, Score.Advantage, otherPlayer),
+            (Score.Forty, Score.Advantage) => (true, currentPlayer, Score.Forty),
+            _ => (true, ++currentPlayer, otherPlayer)
+        };
     }
 
 
