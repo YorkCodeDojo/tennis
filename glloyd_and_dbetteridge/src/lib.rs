@@ -10,23 +10,23 @@ pub enum PlayerScore {
 
 impl Display for PlayerScore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = match self {
+        let score_text = match self {
             Self::Love => "love",
             Self::Fifteen => "15",
             Self::Thirty => "30",
             Self::Forty => "40",
         };
-        write!(f, "{}", str)
+        write!(f, "{}", score_text)
     }
 }
 
 impl PlayerScore {
-    fn advance_score(self) -> Self {
+    fn next(self) -> Self {
         match self {
             Self::Love => Self::Fifteen,
             Self::Fifteen => Self::Thirty,
             Self::Thirty => Self::Forty,
-            Self::Forty => Self::Forty,
+            Self::Forty => unreachable!("Cannot advance from Forty in regular scoring"),
         }
     }
 }
@@ -47,11 +47,11 @@ pub enum Player {
 
 impl Display for Player {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = match self {
+        let player_text = match self {
             Player::One => "Player 1",
             Player::Two => "Player 2",
         };
-        write!(f, "{}", str)
+        write!(f, "{}", player_text)
     }
 }
 
@@ -64,17 +64,17 @@ impl Default for Game {
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Deuce => write!(f, "Deuce"),
+            Self::Deuce => f.write_str("Deuce"),
             Self::Advantage(player) => write!(f, "Advantage {}", player),
             Self::Win(player) => write!(f, "{} has won", player),
-            Self::Scores(lhs, rhs) if lhs == rhs => write!(f, "{}-all", lhs),
-            Self::Scores(lhs, rhs) => write!(f, "{}-{}", lhs, rhs),
+            Self::Scores(player1_score, player2_score) if player1_score == player2_score => write!(f, "{}-all", player1_score),
+            Self::Scores(player1_score, player2_score) => write!(f, "{}-{}", player1_score, player2_score),
         }
     }
 }
 
 impl Game {
-    pub fn advance_score(self, player: Player) -> Self {
+    fn advance_score(self, player: Player) -> Self {
         match (player, self) {
             (x, Self::Advantage(y)) if x != y => Self::Deuce,
             (Player::One, Self::Scores(PlayerScore::Thirty, PlayerScore::Forty)) => Self::Deuce,
@@ -86,11 +86,11 @@ impl Game {
             (Player::One, Self::Scores(PlayerScore::Forty, _)) => Self::Win(Player::One),
             (Player::Two, Self::Scores(_, PlayerScore::Forty)) => Self::Win(Player::Two),
 
-            (Player::One, Self::Scores(player1, player2)) => {
-                Self::Scores(player1.advance_score(), player2)
+            (Player::One, Self::Scores(player1_score, player2_score)) => {
+                Self::Scores(player1_score.next(), player2_score)
             }
-            (Player::Two, Self::Scores(player1, player2)) => {
-                Self::Scores(player1, player2.advance_score())
+            (Player::Two, Self::Scores(player1_score, player2_score)) => {
+                Self::Scores(player1_score, player2_score.next())
             }
             (_, x) => x,
         }
