@@ -55,9 +55,28 @@ impl Display for Player {
     }
 }
 
+impl Default for Game {
+    fn default() -> Self {
+        Self::Scores(PlayerScore::Love, PlayerScore::Love)
+    }
+}
+
+impl Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let score_text = match self {
+            Self::Deuce => "Deuce",
+            Self::Advantage(player) => return write!(f, "Advantage {}", player),
+            Self::Win(player) => return write!(f, "{} has won", player),
+            Self::Scores(lhs, rhs) if lhs == rhs => return write!(f, "{}-all", lhs),
+            Self::Scores(lhs, rhs) => return write!(f, "{}-{}", lhs, rhs),
+        };
+        write!(f, "{}", score_text)
+    }
+}
+
 impl Game {
     pub fn new() -> Self {
-        Self::Scores(PlayerScore::Love, PlayerScore::Love)
+        Self::default()
     }
 
     pub fn advance_score(self, player: Player) -> Self {
@@ -82,23 +101,10 @@ impl Game {
         }
     }
 
-    pub fn point_for_player_one(&mut self) {
-        *self = self.advance_score(Player::One);
+    pub fn score_point(&mut self, player: Player) {
+        *self = self.advance_score(player);
     }
 
-    pub fn point_for_player_two(&mut self) {
-        *self = self.advance_score(Player::Two);
-    }
-
-    pub fn print_score(&self) -> String {
-        match self {
-            Self::Deuce => "Deuce".to_string(),
-            Self::Advantage(x) => format!("Advantage {}", x),
-            Self::Win(x) => format!("{} has won", x),
-            Self::Scores(lhs, rhs) if lhs == rhs => format!("{}-all", lhs),
-            Self::Scores(lhs, rhs) => format!("{}-{}", lhs, rhs),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -122,17 +128,12 @@ mod tests {
         let mut game = Game::new();
 
         for (i, &n) in sequence.iter().enumerate() {
-            if i % 2 == 0 {
-                for _ in 0..n {
-                    game.point_for_player_one();
-                }
-            } else {
-                for _ in 0..n {
-                    game.point_for_player_two();
-                }
+            let player = if i % 2 == 0 { Player::One } else { Player::Two };
+            for _ in 0..n {
+                game.score_point(player);
             }
         }
 
-        assert_eq!(game.print_score(), expected);
+        assert_eq!(game.to_string(), expected);
     }
 }

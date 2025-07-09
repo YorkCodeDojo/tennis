@@ -1,12 +1,12 @@
-use tennis::Game;
+use tennis::{Game, Player};
 
 fn main() {
     let mut game = Game::new();
-    println!("Starting game: {}", game.print_score());
+    println!("Starting game: {}", game);
     
-    game.point_for_player_one();
-    println!("After player 1 scores: {}", game.print_score());
+    game.score_point(Player::One);
+    println!("After player 1 scores: {}", game);
     
-    game.point_for_player_two();
-    println!("After player 2 scores: {}", game.print_score());
+    game.score_point(Player::Two);
+    println!("After player 2 scores: {}", game);
 }
