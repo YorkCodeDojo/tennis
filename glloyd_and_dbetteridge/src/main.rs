@@ -57,25 +57,27 @@ impl Game {
     }
 
     pub(crate) fn advance_score(self, player: Player) -> Game {
-        match player {
-            Player::One => match self {
-                Game::Deuce => Game::AdvantagePlayer1,
-                Game::AdvantagePlayer1 => Game::Player1Win,
-                Game::AdvantagePlayer2 => Game::Deuce,
-                Game::Scores(PlayerScore::Thirty, PlayerScore::Forty) => Game::Deuce,
-                Game::Scores(PlayerScore::Forty, _) => Game::Player1Win,
-                Game::Scores(player1, player2) => Game::Scores(player1.advance_score(), player2),
-                x => x,
-            },
-            Player::Two => match self {
-                Game::Deuce => Game::AdvantagePlayer2,
-                Game::AdvantagePlayer1 => Game::Deuce,
-                Game::AdvantagePlayer2 => Game::Player2Win,
-                Game::Scores(PlayerScore::Forty, PlayerScore::Thirty) => Game::Deuce,
-                Game::Scores(_, PlayerScore::Forty) => Game::Player2Win,
-                Game::Scores(player1, player2) => Game::Scores(player1, player2.advance_score()),
-                x => x,
-            },
+        match (player, self) {
+            (Player::One, Game::Deuce) => Game::AdvantagePlayer1,
+            (Player::Two, Game::Deuce) => Game::AdvantagePlayer2,
+
+            (Player::One, Game::AdvantagePlayer2) => Game::Deuce,
+            (Player::Two, Game::AdvantagePlayer1) => Game::Deuce,
+            (Player::One, Game::Scores(PlayerScore::Thirty, PlayerScore::Forty)) => Game::Deuce,
+            (Player::Two, Game::Scores(PlayerScore::Forty, PlayerScore::Thirty)) => Game::Deuce,
+
+            (Player::One, Game::AdvantagePlayer1) => Game::Player1Win,
+            (Player::Two, Game::AdvantagePlayer2) => Game::Player2Win,
+            (Player::One, Game::Scores(PlayerScore::Forty, _)) => Game::Player1Win,
+            (Player::Two, Game::Scores(_, PlayerScore::Forty)) => Game::Player2Win,
+
+            (Player::One, Game::Scores(player1, player2)) => {
+                Game::Scores(player1.advance_score(), player2)
+            }
+            (Player::Two, Game::Scores(player1, player2)) => {
+                Game::Scores(player1, player2.advance_score())
+            }
+            (_, x) => x,
         }
     }
 
