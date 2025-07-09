@@ -101,7 +101,8 @@ impl Game {
             Game::Scores(_, PlayerScore::Win) => "player2 has won".to_string(),
             Game::Scores(lhs, rhs) if lhs == rhs => format!("{}-all", lhs),
             Game::Scores(lhs, rhs) => format!("{}-{}", lhs, rhs),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -109,80 +110,32 @@ impl Game {
 mod tests {
     use crate::*;
 
-    #[test]
-    fn a_new_game_is_love_all() {
-        let sut = Game::new();
-        assert_eq!(sut.print_score(), "love-all");
-    }
+    use rstest::rstest;
 
-    #[test]
-    fn if_player1_once_then_has_score_15_love() {
-        let mut sut = Game::new();
-        sut.point_for_player_one();
-        assert_eq!(sut.print_score(), "15-love");
-    }
+    #[rstest]
+    #[case(vec!(0,0), "love-all")]
+    #[case(vec!(1,0), "15-love")]
+    #[case(vec!(2,0), "30-love")]
+    #[case(vec!(0,1), "love-15")]
+    #[case(vec!(3,0), "40-love")]
+    #[case(vec!(4,0), "player1 has won")]
+    #[case(vec!(3,3), "Deuce")]
+    #[case(vec!(3,3,1), "Advantage player1")]
+    fn test_tennis_scoring(#[case] sequence: Vec<i32>, #[case] expected: &str) {
+        let mut game = Game::new();
 
-    #[test]
-    fn if_player1_scores_twice_then_has_score_30_love() {
-        let mut sut = Game::new();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        assert_eq!(sut.print_score(), "30-love");
-    }
+        for (i, &n) in sequence.iter().enumerate() {
+            if i % 2 == 0 {
+                for _ in 0..n {
+                    game.point_for_player_one();
+                }
+            } else {
+                for _ in 0..n {
+                    game.point_for_player_two();
+                }
+            }
+        }
 
-    #[test]
-    fn if_player2_once_then_has_score_love_15() {
-        let mut sut = Game::new();
-        sut.point_for_player_two();
-        assert_eq!(sut.print_score(), "love-15");
-    }
-
-    #[test]
-    fn if_player1_scores_three_times_then_has_score_40_love() {
-        let mut sut = Game::new();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        assert_eq!(sut.print_score(), "40-love");
-    }
-
-    #[test]
-    fn if_player1_scores_four_times_then_has_player1_has_won() {
-        let mut sut = Game::new();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        assert_eq!(sut.print_score(), "player1 has won");
-    }
-
-    #[test]
-    fn if_both_players_have_40_then_its_deuce() {
-        let mut sut = Game::new();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-
-        sut.point_for_player_two();
-        sut.point_for_player_two();
-        sut.point_for_player_two();
-
-        assert_eq!(sut.print_score(), "Deuce");
-    }
-
-    #[test]
-    fn from_deuce_player1_can_take_the_advantage() {
-        let mut sut = Game::new();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-        sut.point_for_player_one();
-
-        sut.point_for_player_two();
-        sut.point_for_player_two();
-        sut.point_for_player_two();
-
-        sut.point_for_player_one();
-
-        assert_eq!(sut.print_score(), "Advantage player1");
+        assert_eq!(game.print_score(), expected);
     }
 }
