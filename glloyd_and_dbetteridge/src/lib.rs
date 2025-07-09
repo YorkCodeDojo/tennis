@@ -48,30 +48,30 @@ pub enum Player {
 }
 
 impl Game {
-    pub fn new() -> Game {
-        Game::Scores(PlayerScore::Love, PlayerScore::Love)
+    pub fn new() -> Self {
+        Self::Scores(PlayerScore::Love, PlayerScore::Love)
     }
 
-    pub fn advance_score(self, player: Player) -> Game {
+    pub fn advance_score(self, player: Player) -> Self {
         match (player, self) {
-            (Player::One, Game::AdvantagePlayer2) => Game::Deuce,
-            (Player::Two, Game::AdvantagePlayer1) => Game::Deuce,
-            (Player::One, Game::Scores(PlayerScore::Thirty, PlayerScore::Forty)) => Game::Deuce,
-            (Player::Two, Game::Scores(PlayerScore::Forty, PlayerScore::Thirty)) => Game::Deuce,
+            (Player::One, Self::AdvantagePlayer2) => Self::Deuce,
+            (Player::Two, Self::AdvantagePlayer1) => Self::Deuce,
+            (Player::One, Self::Scores(PlayerScore::Thirty, PlayerScore::Forty)) => Self::Deuce,
+            (Player::Two, Self::Scores(PlayerScore::Forty, PlayerScore::Thirty)) => Self::Deuce,
 
-            (Player::One, Game::Deuce) => Game::AdvantagePlayer1,
-            (Player::Two, Game::Deuce) => Game::AdvantagePlayer2,
+            (Player::One, Self::Deuce) => Self::AdvantagePlayer1,
+            (Player::Two, Self::Deuce) => Self::AdvantagePlayer2,
 
-            (Player::One, Game::AdvantagePlayer1) => Game::Player1Win,
-            (Player::Two, Game::AdvantagePlayer2) => Game::Player2Win,
-            (Player::One, Game::Scores(PlayerScore::Forty, _)) => Game::Player1Win,
-            (Player::Two, Game::Scores(_, PlayerScore::Forty)) => Game::Player2Win,
+            (Player::One, Self::AdvantagePlayer1) => Self::Player1Win,
+            (Player::Two, Self::AdvantagePlayer2) => Self::Player2Win,
+            (Player::One, Self::Scores(PlayerScore::Forty, _)) => Self::Player1Win,
+            (Player::Two, Self::Scores(_, PlayerScore::Forty)) => Self::Player2Win,
 
-            (Player::One, Game::Scores(player1, player2)) => {
-                Game::Scores(player1.advance_score(), player2)
+            (Player::One, Self::Scores(player1, player2)) => {
+                Self::Scores(player1.advance_score(), player2)
             }
-            (Player::Two, Game::Scores(player1, player2)) => {
-                Game::Scores(player1, player2.advance_score())
+            (Player::Two, Self::Scores(player1, player2)) => {
+                Self::Scores(player1, player2.advance_score())
             }
             (_, x) => x,
         }
@@ -87,13 +87,13 @@ impl Game {
 
     pub fn print_score(&self) -> String {
         match self {
-            Game::Deuce => "Deuce".to_string(),
-            Game::AdvantagePlayer1 => "Advantage player1".to_string(),
-            Game::AdvantagePlayer2 => "Advantage player2".to_string(),
-            Game::Player1Win => "player1 has won".to_string(),
-            Game::Player2Win => "player2 has won".to_string(),
-            Game::Scores(lhs, rhs) if lhs == rhs => format!("{}-all", lhs),
-            Game::Scores(lhs, rhs) => format!("{}-{}", lhs, rhs),
+            Self::Deuce => "Deuce".to_string(),
+            Self::AdvantagePlayer1 => "Advantage player1".to_string(),
+            Self::AdvantagePlayer2 => "Advantage player2".to_string(),
+            Self::Player1Win => "player1 has won".to_string(),
+            Self::Player2Win => "player2 has won".to_string(),
+            Self::Scores(lhs, rhs) if lhs == rhs => format!("{}-all", lhs),
+            Self::Scores(lhs, rhs) => format!("{}-{}", lhs, rhs),
         }
     }
 }
