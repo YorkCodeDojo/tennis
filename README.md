@@ -31,6 +31,13 @@ I suggest trying the ping-pong style of testing.
 * As a pair you then refactor
 * Swap roles
 
+## Advanced
+
+If you get to the end of the task,  then try creating a 2nd implementation (without changing your tests).
+
+For example,  try creating a version which doesn't use any IF statements.
+
+
 ## Getting started
 1. Fork this repo (https://github.com/YorkCodeDojo/tennis) and clone it to your machine.
 2. Create a folder in your local copy with name of your pair.
