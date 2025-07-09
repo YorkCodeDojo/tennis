@@ -1,0 +1,15 @@
+{
+  "name": "asgjs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "tap": "^21.1.0"
+  },
+  "type": "module"
+}
