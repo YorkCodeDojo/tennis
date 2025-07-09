@@ -1,7 +1,10 @@
 [package]
-name = "glloyd_and_dbetteridge"
+name = "tennis"
 version = "0.1.0"
 edition = "2024"
+
+[lib]
+name = "tennis"
 
 [dependencies]
 rstest = "0.25.0"
