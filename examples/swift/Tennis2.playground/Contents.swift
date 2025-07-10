@@ -40,21 +40,20 @@ struct Game {
 
 // Simple tennis scoring
 struct TennisScorer {
-    
+
     // Award a point to player 1 or player 2
     static func awardPoint(to playerNumber: Int, game: Game) -> Game {
         
+        // Give the point to the player and update their score
         if playerNumber == 1 {
-            let newPlayer1 = getNextPoints(from: game.player1.points)
-            let updatedGame = Game(state: game.state,
-                                 player1: Player(points: newPlayer1),
-                                 player2: game.player2)
+            let newPoints = getNextPoints(from: game.player1.points)
+            let newPlayer1 = Player(points: newPoints)
+            let updatedGame = Game(state: game.state, player1: newPlayer1, player2: game.player2)
             return checkGameResult(updatedGame, whoScored: 1)
         } else {
-            let newPlayer2 = getNextPoints(from: game.player2.points)
-            let updatedGame = Game(state: game.state,
-                                 player1: game.player1,
-                                 player2: Player(points: newPlayer2))
+            let newPoints = getNextPoints(from: game.player2.points)
+            let newPlayer2 = Player(points: newPoints)
+            let updatedGame = Game(state: game.state, player1: game.player1, player2: newPlayer2)
             return checkGameResult(updatedGame, whoScored: 2)
         }
     }
@@ -72,37 +71,63 @@ struct TennisScorer {
     
     // Check if someone won or if it's deuce
     static func checkGameResult(_ game: Game, whoScored: Int) -> Game {
-        let p1 = game.player1.points
-        let p2 = game.player2.points
+        let p1Points = game.player1.points
+        let p2Points = game.player2.points
         
-        // Both have 40? That's deuce!
-        if p1 == .forty && p2 == .forty {
+        // RULE 1: Win from advantage
+        // If you have advantage and score again, you win!
+        if didPlayerWin(whoScored: whoScored, p1Points: p1Points, p2Points: p2Points) {
+            print("🎾 Player \(whoScored) wins the game!")
+            return Game(state: .won, player1: game.player1, player2: game.player2)
+        }
+        
+        // RULE 2: Check for deuce
+        // When both players have 40, it's deuce
+        if p1Points == .forty && p2Points == .forty {
             return Game(state: .deuce, player1: game.player1, player2: game.player2)
         }
         
-        // Someone with advantage wins the game
-        if (whoScored == 1 && p1 == .advantage && p2 != .forty) ||
-           (whoScored == 2 && p2 == .advantage && p1 != .forty) {
-            print("🎾 Player \(whoScored) wins the game!")
-            return Game(state: .won, player1: game.player1, player2: game.player2)
-        }
-        
-        // Someone wins without deuce (opponent has less than 40)
-        if (whoScored == 1 && p1 == .advantage && p2 != .forty && p2 != .advantage) ||
-           (whoScored == 2 && p2 == .advantage && p1 != .forty && p1 != .advantage) {
-            print("🎾 Player \(whoScored) wins the game!")
-            return Game(state: .won, player1: game.player1, player2: game.player2)
-        }
-        
-        // Back to deuce from advantage
-        if game.state == .deuce &&
-           ((whoScored == 1 && p2 == .advantage) || (whoScored == 2 && p1 == .advantage)) {
+        // RULE 3: Back to deuce from advantage
+        // If one player has advantage but the other scores, back to deuce
+        if shouldGoBackToDeuce(currentState: game.state, whoScored: whoScored, p1Points: p1Points, p2Points: p2Points) {
             return Game(state: .deuce,
                        player1: Player(points: .forty),
                        player2: Player(points: .forty))
         }
         
+        // Continue playing
         return Game(state: .playing, player1: game.player1, player2: game.player2)
+    }
+    
+    // Helper: Did someone win the game?
+    static func didPlayerWin(whoScored: Int, p1Points: Points, p2Points: Points) -> Bool {
+        if whoScored == 1 && p1Points == .advantage {
+            return true
+        }
+        if whoScored == 2 && p2Points == .advantage {
+            return true
+        }
+        return false
+    }
+    
+    // Helper: Should we go back to deuce?
+    static func shouldGoBackToDeuce(currentState: GameState, whoScored: Int, p1Points: Points, p2Points: Points) -> Bool {
+        // Only relevant if we're already at deuce
+        if currentState != .deuce {
+            return false
+        }
+        
+        // Player 1 scored, but Player 2 had advantage
+        if whoScored == 1 && p2Points == .advantage {
+            return true
+        }
+        
+        // Player 2 scored, but Player 1 had advantage
+        if whoScored == 2 && p1Points == .advantage {
+            return true
+        }
+        
+        return false
     }
 }
 
@@ -171,8 +196,13 @@ func testDeuce() {
     print("\n🏸 Testing Deuce...")
     var game = Game()
     
-    // Both players get to 40
-    game = Game(player1: Player(points: .forty), player2: Player(points: .forty))
+    // Get both players to 30, then they both score to reach 40-40 (deuce)
+    game = Game(player1: Player(points: .thirty), player2: Player(points: .thirty))
+    
+    // Player 1 scores: 30 -> 40
+    game = TennisScorer.awardPoint(to: 1, game: game)
+    // Player 2 scores: 30 -> 40 (this should trigger deuce)
+    game = TennisScorer.awardPoint(to: 2, game: game)
     ScoreDisplay.show(game)
     checkEqual(game.state, .deuce, "Should be deuce when both have 40")
 }
@@ -214,6 +244,50 @@ testAdvantage()
 testWinFromAdvantage()
 
 print("\n All tests done!")
+
+// 🎾 Let's play a quick demo game!
+print("\n\n🎾 DEMO GAME - Watch a complete tennis game!")
+print("===============================================")
+
+var demoGame = Game()
+print("Starting game...")
+ScoreDisplay.show(demoGame)
+
+// Player 1 scores some points
+print("\nPlayer 1 scores...")
+demoGame = TennisScorer.awardPoint(to: 1, game: demoGame)
+ScoreDisplay.show(demoGame)
+
+print("\nPlayer 1 scores again...")
+demoGame = TennisScorer.awardPoint(to: 1, game: demoGame)
+ScoreDisplay.show(demoGame)
+
+// Player 2 catches up
+print("\nPlayer 2 scores...")
+demoGame = TennisScorer.awardPoint(to: 2, game: demoGame)
+ScoreDisplay.show(demoGame)
+
+print("\nPlayer 2 scores again...")
+demoGame = TennisScorer.awardPoint(to: 2, game: demoGame)
+ScoreDisplay.show(demoGame)
+
+// Both reach 40 - deuce!
+print("\nPlayer 1 scores (gets to 40)...")
+demoGame = TennisScorer.awardPoint(to: 1, game: demoGame)
+ScoreDisplay.show(demoGame)
+
+print("\nPlayer 2 scores (also gets to 40 - DEUCE!)...")
+demoGame = TennisScorer.awardPoint(to: 2, game: demoGame)
+ScoreDisplay.show(demoGame)
+
+// Advantage and win
+print("\nPlayer 1 scores from deuce (gets advantage)...")
+demoGame = TennisScorer.awardPoint(to: 1, game: demoGame)
+ScoreDisplay.show(demoGame)
+
+print("\nPlayer 1 scores again (WINS!)...")
+demoGame = TennisScorer.awardPoint(to: 1, game: demoGame)
+ScoreDisplay.show(demoGame)
 
 // 📋 Simple test helper
 func checkEqual<T: Equatable>(_ actual: T, _ expected: T, _ message: String = "") {
